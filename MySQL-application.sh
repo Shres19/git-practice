@@ -38,17 +38,34 @@ USAGE(){
 echo "Script started at $(date)" | tee -a $LOG_FILE 
 CHECK_ROOT
 
-dnf install mysql-server -y 
-VALIDATE $? "Installing mySQL Server"
+dnf install mysql-server -y &>>$LOG_FILE
+VALIDATE $? "Installing mySQL Server is.."
 
-systemctl enable mysqld
-VALIDATE $? "Enabled mySQL Server"
+systemctl enable mysqld &>>$LOG_FILE
+VALIDATE $? "Enabled mySQL Server is.."
 
-systemctl stat mysqld
-VALIDATE $? "Started mySQL Server"
+systemctl start mysqld &>>$LOG_FILE
+VALIDATE $? "Started mySQL Server is .."
 
-mysql_secure_installation --set-root-pass ExpenseApp@1
-VALIDATE $? "completed setting root pwd for mySQL Server"
+#mysql_secure_installation --set-root-pass ExpenseApp@1 &>>$LOG_FILE
+mysql -h mysql.daws.online -u root -pExpenseApp@1 -e 'show databases;' &>>$LOG_FILE
+if [ $? -ne 0 ]
+then 
+    echo "MySQL Root password is not setup..setting now." &>>$LOG_FILE
+    mysql_secure_installation --set-root-pass ExpenseApp@1
+    VALIDATE $? "setting root pwd for mySQL Server"
+else
+    echo -e "MYSQL root password is already setup...$Y Skipping $N" | tee -a $LOG_FILE
+fi
+
+#idempotency mysql -h localhost -u root -pExpenseApp@1 mysql -h <ipaddressmysql172.1.36.169> -u root -pExpenseApp@1
+#mysql -h <ipaddressmysql172.1.36.169> -u root -pExpenseApp@1 -e 'show databases;'
+#nslookup 172.9.6.169 - to check dns status
+#logging off byeeee
+
+
+
+
 
 
 

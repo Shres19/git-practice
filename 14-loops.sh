@@ -20,7 +20,8 @@
 
 for j in {0..10}
 do
-    echo$j
+    echo $j
+    echo "shrests naga"
 done
 
 
